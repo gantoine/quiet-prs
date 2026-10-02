@@ -64,6 +64,29 @@ npm run publish:chrome -- --dry-run
 
 `test/e2e.mjs` loads `content/classify.js` and `content/lanes.js` into a page with a stubbed extension API rather than installing the extension, because Chrome 137+ refuses `--load-extension` in branded builds. The manifest itself is checked with `"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" --pack-extension=dist/chrome`.
 
+### Refreshing the Chrome Web Store token
+
+When the release's Chrome job fails with `invalid_grant` ("Token has been expired or revoked"), `CHROME_REFRESH_TOKEN` needs replacing. The client id and secret stay the same.
+
+1. Open this in a browser, signed in as the account that owns the Web Store item, with your client id filled in:
+
+   ```
+   https://accounts.google.com/o/oauth2/v2/auth?response_type=code&access_type=offline&prompt=consent&scope=https://www.googleapis.com/auth/chromewebstore&redirect_uri=http://localhost:8818&client_id=CLIENT_ID
+   ```
+
+   After you click **Allow**, the browser lands on a localhost page that does not load. Copy the `code` parameter from the address bar.
+2. Exchange the code for a refresh token:
+
+   ```bash
+   curl -s https://oauth2.googleapis.com/token -d grant_type=authorization_code \
+     -d client_id=CLIENT_ID -d client_secret=CLIENT_SECRET \
+     -d redirect_uri=http://localhost:8818 -d code=CODE
+   ```
+
+   If the response includes `refresh_token_expires_in`, the app is still in Testing and the token will expire again.
+3. Store the `refresh_token` from the response: replace `CHROME_REFRESH_TOKEN` in `.env`, then run `gh secret set CHROME_REFRESH_TOKEN` and paste it when prompted.
+4. Re-run the failed job: `gh run rerun <run-id> --failed`.
+
 ## Licence
 
 MIT. See [LICENSE](LICENSE).
