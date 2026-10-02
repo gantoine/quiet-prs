@@ -323,13 +323,17 @@
   cursor: pointer;
 }
 
-/* In the avatar gutter, the one column every comment has. */
-.prlanes-hide--rail {
-  position: absolute;
-  z-index: 4;
-  width: 40px;
-  margin: 0;
-  padding: 1px 0;
+/* Beside the comment's own actions, the pencil and the kebab, cut like the role label there. */
+.prlanes-hide--header {
+  align-self: center;
+  margin: 2px 6px 0 2px;
+  padding: 0 var(--base-size-6, 6px);
+  border-width: var(--borderWidth-thin, 1px);
+  border-radius: var(--borderRadius-full, 100vh);
+  font-size: var(--text-body-size-small, 12px);
+  font-weight: var(--base-text-weight-medium, 500);
+  line-height: 18px;
+  vertical-align: middle;
 }
 
 .prlanes-hide:hover {

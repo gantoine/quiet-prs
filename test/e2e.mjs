@@ -117,7 +117,7 @@ const SNAPSHOT = `(() => {
       face: face.tagName.toLowerCase() === 'img' ? face.getAttribute('src') : 'icon',
       title: strip.getAttribute('title'),
       hideShown: (() => { const h = row.querySelector('.prlanes-hide'); return Boolean(h) && getComputedStyle(h).display !== 'none'; })(),
-      hideRailed: Boolean(row.querySelector('.prlanes-hide--rail')),
+      hideIn: (() => { const h = row.querySelector('.prlanes-hide'); return !h ? null : h.parentElement.matches('.timeline-comment-actions') ? 'actions' : h.parentElement.matches('.timeline-comment-header') ? 'header' : 'row'; })(),
       more: strip.querySelector('.prlanes-strip-more').textContent,
       bodyHidden: Boolean(body) && getComputedStyle(body).display === 'none'
     };
@@ -289,7 +289,7 @@ if (process.argv.includes('--serve')) {
         face: 'icon',
         title: 'Show this comment',
         hideShown: false,
-        hideRailed: false,
+        hideIn: 'row',
         more: '',
         bodyHidden: true
       },
@@ -312,7 +312,7 @@ if (process.argv.includes('--serve')) {
     assert.equal(peeked.strips['bot-comment'].bodyHidden, false, 'the comment it stands for is there');
     assert.equal(peeked.strips['bot-comment'].shown, false, 'and the strip that stood in for it is done');
     assert.equal(peeked.strips['bot-comment'].hideShown, true, 'a Hide takes its place');
-    assert.equal(peeked.strips['bot-comment'].hideRailed, false, 'inline, for a row GitHub gave no avatar');
+    assert.equal(peeked.strips['bot-comment'].hideIn, 'actions', 'beside the pencil and the kebab');
     assert.equal(peeked.hiding.bots.on, true, 'the button above it did not move');
     assert.equal(peeked.rows['avatar-bot'].fold, 'strip', 'and no other bot comment opened');
 
@@ -336,7 +336,7 @@ if (process.argv.includes('--serve')) {
     assert.equal(run.rows['run-2'].visible, true, 'run-2 visible');
     assert.equal(run.rows['run-3'].visible, true, 'run-3 visible');
     assert.equal(run.strips['run-1'].hideShown, true, 'one Hide folds the whole run');
-    assert.equal(run.strips['run-1'].hideRailed, true, 'sitting in the avatar gutter');
+    assert.equal(run.strips['run-1'].hideIn, 'header', 'in the header, for a comment with no actions of its own');
     assert.equal(run.strips['run-2'].hideShown, false, 'the followers carry none');
 
     await evaluate('document.querySelector(\'[data-row="run-1"] .prlanes-hide\').click()');

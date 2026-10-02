@@ -35,6 +35,8 @@
   const STATE_ROW_SELECTOR = '[class*="HeaderMetadata-module__metadataContent"], [class*="metadataContent"], .gh-header-meta';
   const AVATAR_RAIL_SELECTOR = '.TimelineItem-avatar, .timeline-comment-avatar';
   const RAIL_GAP = 12;
+  const COMMENT_ACTIONS_SELECTOR = '.timeline-comment-actions, [data-testid="comment-header-right-side-items"]';
+  const COMMENT_HEADER_SELECTOR = '.timeline-comment-header, .review-comment-header, [data-testid="comment-header"]';
 
   const COMPACT_SLOTS = ['rail', 'header', 'state'];
 
@@ -147,22 +149,20 @@
     ]);
   }
 
-  // Expanded, the way back sits in the avatar gutter, the one column every comment has. A row
-  // GitHub gives no avatar to takes it inline at the top instead.
+  // Expanded, the way back sits with the comment's own actions, by the edit pencil and the
+  // kebab. A row with no actions takes it in its header, and one with no header at the top.
   function placeHide(row, control) {
-    const avatar = row.querySelector(AVATAR_RAIL_SELECTOR);
-    const gutter = railOf(avatar);
+    const actions = row.querySelector(COMMENT_ACTIONS_SELECTOR);
+    const header = actions ? null : row.querySelector(COMMENT_HEADER_SELECTOR);
 
-    if (!gutter) {
-      control.classList.remove('prlanes-hide--rail');
-      if (control.getAttribute('style')) control.removeAttribute('style');
-      if (control.parentElement !== row) row.insertBefore(control, row.firstChild);
-      return;
+    if (actions) {
+      if (control.parentElement !== actions) actions.insertBefore(control, actions.firstChild);
+    } else if (header) {
+      if (control.parentElement !== header) header.appendChild(control);
+    } else if (control.parentElement !== row) {
+      row.insertBefore(control, row.firstChild);
     }
-
-    if (control.parentElement !== avatar.parentElement) avatar.parentElement.insertBefore(control, avatar.nextSibling);
-    control.classList.add('prlanes-hide--rail');
-    railTo(control, gutter);
+    control.classList.toggle('prlanes-hide--header', Boolean(actions || header));
   }
 
   function fillStrip(row, kind) {
