@@ -133,6 +133,12 @@
   margin: 0 0 0 auto;
 }
 
+.prlanes-fit {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0 !important;
+}
+
 .prlanes-bar--tabs {
   gap: 8px;
 }

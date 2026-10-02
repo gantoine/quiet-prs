@@ -25,6 +25,7 @@
   let scanHandle = 0;
   let placeHandle = 0;
   let lastTarget = null;
+  let fitted = null;
   let lastUrl = location.href;
 
   const STICKY_HEADER_SELECTOR = '[class*="stickyHeader" i], .gh-header-sticky, [data-testid*="sticky-header"]';
@@ -44,6 +45,7 @@
   const STRIP_CHILD_SELECTOR = `:scope > .${STRIP_CLASS}`;
   const TOGGLE_CLASS = 'prlanes-toggle';
   const HIDE_CLASS = 'prlanes-hide';
+  const FIT_CLASS = 'prlanes-fit';
   const TABLE_TAGS = /^(table|thead|tbody|tfoot|tr)$/i;
   const NOBODY = { human: 'someone', bot: 'a bot' };
 
@@ -362,7 +364,7 @@
 
   function barSlot() {
     const sticky = document.querySelector(STICKY_HEADER_SELECTOR);
-    if (visible(sticky)) return { element: sticky.querySelector(HEADER_SLOT_SELECTOR) || sticky, variant: 'header' };
+    if (visible(sticky)) return { element: sticky.querySelector(HEADER_SLOT_SELECTOR) || sticky, variant: 'header', fit: true };
 
     const avatar = authorAvatar();
     const gutter = railOf(avatar);
@@ -392,6 +394,16 @@
 
 
 
+  // GitHub holds the sticky title row at 1280px however narrow the window, and the bar rides
+  // its far end, off the screen. While the bar is in it, the row fits the window instead.
+  function fitTo(element) {
+    if (fitted !== element) {
+      if (fitted) fitted.classList.remove(FIT_CLASS);
+      fitted = element;
+    }
+    if (element && !element.classList.contains(FIT_CLASS)) element.classList.add(FIT_CLASS);
+  }
+
   function placeBar(target) {
     lastTarget = target;
     if (!bar) bar = buildBar();
@@ -403,6 +415,8 @@
     bar.classList.toggle('prlanes-bar--rail', variant === 'rail');
     bar.classList.toggle('prlanes-bar--state', variant === 'state');
     bar.classList.toggle('prlanes-bar--compact', COMPACT_SLOTS.indexOf(variant) !== -1);
+
+    fitTo(slot && slot.fit ? slot.element : null);
 
     if (slot) {
       if (bar.parentElement !== slot.element) slot.element.appendChild(bar);
@@ -432,6 +446,7 @@
   function scan() {
     if (!isThreadPage()) {
       if (bar && bar.isConnected) bar.remove();
+      fitTo(null);
       return;
     }
 
