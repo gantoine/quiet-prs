@@ -80,6 +80,10 @@
   color: var(--fgColor-muted, var(--color-fg-muted, #59636e));
 }
 
+.prlanes-bar--compact .prlanes-settings {
+  justify-content: flex-end;
+}
+
 .prlanes-bar--compact .prlanes-toggle--lit {
   color: var(--prlanes-dot-color, inherit);
 }
