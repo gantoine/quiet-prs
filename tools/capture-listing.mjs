@@ -120,9 +120,6 @@ try {
   })()`);
   if (conversation < 0) throw new Error(`no bot comment to point at on ${PR_URL}`);
 
-  // The bar only carries its labels away from the icon-only rail, so drop the avatar it rails against.
-  await evaluate("document.querySelectorAll('.js-discussion .TimelineItem-avatar, .js-discussion .timeline-comment-avatar').forEach((node) => node.remove())");
-  await wait(2000);
   const bar = JSON.parse(await evaluate(`(() => {
     const bar = document.querySelector('.prlanes-bar');
     bar.scrollIntoView({ block: 'center' });

@@ -46,21 +46,14 @@
   transform: translateY(-50%) rotate(-45deg);
 }
 
-.prlanes-bar--rail {
-  position: absolute;
-  z-index: 5;
-  flex-direction: column;
-  width: 40px;
-  margin: 0;
-  padding: 4px;
-}
-
-.prlanes-bar--rail .prlanes-toggles {
-  flex-direction: column;
-}
-
-.prlanes-bar--rail .prlanes-settings {
+.prlanes-bar--diff {
+  position: static;
+  margin: -5px 12px 0 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
   align-self: center;
+  flex-wrap: nowrap;
 }
 
 .prlanes-bar--state {

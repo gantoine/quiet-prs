@@ -150,9 +150,8 @@ const SNAPSHOT = `(() => {
     gearIcon: Boolean(bar.querySelector('.prlanes-settings .prlanes-gear')),
     barText: bar.textContent.trim(),
     barBeforeTimeline: bar.nextElementSibling === document.querySelector('.js-discussion'),
-    slot: ['rail', 'state', 'tabs', 'header'].find((name) => bar.classList.contains('prlanes-bar--' + name)) || 'timeline',
-    railLeft: bar.style.left,
-    railTop: bar.style.top,
+    slot: ['diff', 'state', 'tabs', 'header'].find((name) => bar.classList.contains('prlanes-bar--' + name)) || 'timeline',
+    leadsSlot: bar.parentElement.firstElementChild === bar,
     slotParent: String(bar.parentElement.className)
   };
 })()`;
@@ -221,9 +220,9 @@ if (process.argv.includes('--serve')) {
       { on: false, label: 'Hide events', title: 'Hide events (E)', lit: true },
       'and with timeline events left alone, so that button offers to hide them'
     );
-    assert.equal(quiet.slot, 'rail', 'the buttons sit in a rail under the author avatar at rest');
-    assert.equal(quiet.railLeft, '-72px', 'the rail lines up with the avatar gutter');
-    assert.equal(quiet.railTop, '52px', 'the rail sits 12px under a 40px avatar');
+    assert.equal(quiet.slot, 'diff', 'the buttons sit at the end of the tab row at rest');
+    assert.match(quiet.slotParent, /rightContentWrapper/, 'beside the diffstat');
+    assert.equal(quiet.leadsSlot, true, 'to the left of the line counts');
     assert.equal(quiet.icons, 2, 'each button carries an icon');
     assert.equal(quiet.gearIcon, true, 'settings is a gear icon');
     assert.equal(quiet.barText, '', 'the bar is icons only, with no counts or labels');
@@ -477,12 +476,12 @@ if (process.argv.includes('--serve')) {
     await settings({ rememberPerRepo: false });
     await clickToggle('events');
     await until('back to the opening positions', (state) => state.hiding.bots.on && !state.hiding.events.on);
-    // An issue has no avatar to rail against, so the buttons go to the row the Open badge is in.
-    await evaluate('document.querySelector(\'[data-role="avatar"]\').remove()');
+    // An issue has no diffstat to lead, so the buttons go to the row the Open badge is in.
+    await evaluate('document.querySelector(\'[data-role="diffstat"]\').remove()');
     const beside = await waitFor(async () => {
       const state = await evaluate(SNAPSHOT);
       return state.slot === 'state' ? state : null;
-    }, 5000, 'the bar to fall in beside the Open badge without an avatar');
+    }, 5000, 'the bar to fall in beside the Open badge without a diffstat');
     assert.match(beside.slotParent, /metadataContent/, 'in the badge row, not the title row');
 
     await evaluate('document.querySelector(\'[data-role="state-row"]\').remove()');
@@ -511,7 +510,6 @@ if (process.argv.includes('--serve')) {
       return state.slot === 'tabs' ? state : null;
     }, 5000, 'the bar to return to the tab row');
     assert.match(unstuck.slotParent, /TabNavList/);
-    assert.equal(unstuck.railLeft, '', 'rail positioning is cleared when the bar leaves the rail');
 
     await evaluate('document.querySelector(\'[data-role="header"]\').remove()');
     const headerless = await waitFor(async () => {

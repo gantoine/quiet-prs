@@ -34,8 +34,7 @@
   const TAB_NAV_SELECTOR = 'nav[class*="TabNav"], nav.tabnav-tabs, .tabnav-tabs';
   const STATE_SELECTOR = '[data-testid="header-state"], .gh-header-meta .State';
   const STATE_ROW_SELECTOR = '[class*="HeaderMetadata-module__metadataContent"], [class*="metadataContent"], .gh-header-meta';
-  const AVATAR_RAIL_SELECTOR = '.TimelineItem-avatar, .timeline-comment-avatar';
-  const RAIL_GAP = 12;
+  const DIFFSTAT_SELECTOR = '[class*="PullRequestHeader-module__rightContentWrapper"]';
   const COMMENT_ACTIONS_SELECTOR = '.timeline-comment-actions, [data-testid="comment-header-right-side-items"]';
   const COMMENT_HEADER_SELECTOR = '.timeline-comment-header, .review-comment-header, [data-testid="comment-header"]';
 
@@ -118,18 +117,6 @@
 
   function setAttr(element, name, value) {
     if (element.getAttribute(name) !== value) element.setAttribute(name, value);
-  }
-
-  // The avatar gutter, measured once. Read before you write: these are layout reads, and
-  // interleaving them with insertions forces a reflow apiece.
-  function railOf(avatar) {
-    if (!avatar || !avatar.parentElement || getComputedStyle(avatar).position !== 'absolute') return null;
-    return { left: getComputedStyle(avatar).left, top: `${avatar.offsetTop + avatar.offsetHeight + RAIL_GAP}px` };
-  }
-
-  function railTo(element, gutter) {
-    if (element.style.left !== gutter.left) element.style.left = gutter.left;
-    if (element.style.top !== gutter.top) element.style.top = gutter.top;
   }
 
   function buildStrip(row, kind) {
@@ -344,13 +331,14 @@
     return nav.firstElementChild || nav;
   }
 
-  function authorAvatar() {
-    const timeline = lanes.findTimelineRoot(document);
-    const avatar = timeline && timeline.querySelector(AVATAR_RAIL_SELECTOR);
-    return visible(avatar) ? avatar : null;
+  // The +/- line count at the far end of the tab row. GitHub floats it right, so the bar
+  // leading it sits at the end of the row too, out of the tabs' way.
+  function diffstat() {
+    const wrapper = document.querySelector(DIFFSTAT_SELECTOR);
+    return visible(wrapper) ? wrapper : null;
   }
 
-  // An issue has no avatar to rail against, and its title row is already crowded. The row the
+  // An issue has no diffstat to lead, and its title row is already crowded. The row the
   // Open badge sits in is the one place with room, and it is where the eye is anyway.
   function stateRow() {
     const badge = document.querySelector(STATE_SELECTOR);
@@ -362,9 +350,8 @@
     const sticky = document.querySelector(STICKY_HEADER_SELECTOR);
     if (visible(sticky)) return { element: sticky.querySelector(HEADER_SLOT_SELECTOR) || sticky, variant: 'header', fit: true };
 
-    const avatar = authorAvatar();
-    const gutter = railOf(avatar);
-    if (gutter) return { element: avatar.parentElement, variant: 'rail', gutter };
+    const diff = diffstat();
+    if (diff) return { element: diff, variant: 'diff', lead: true };
 
     const state = stateRow();
     if (state) return { element: state, variant: 'state' };
@@ -408,16 +395,18 @@
     const variant = slot ? slot.variant : '';
     bar.classList.toggle('prlanes-bar--header', variant === 'header');
     bar.classList.toggle('prlanes-bar--tabs', variant === 'tabs');
-    bar.classList.toggle('prlanes-bar--rail', variant === 'rail');
+    bar.classList.toggle('prlanes-bar--diff', variant === 'diff');
     bar.classList.toggle('prlanes-bar--state', variant === 'state');
     bar.classList.toggle('prlanes-bar--sticky', Boolean(slot && slot.fit));
 
     fitTo(slot && slot.fit ? slot.element : null);
 
     if (slot) {
-      if (bar.parentElement !== slot.element) slot.element.appendChild(bar);
-      if (slot.variant === 'rail') railTo(bar, slot.gutter);
-      else bar.removeAttribute('style');
+      if (slot.lead) {
+        if (slot.element.firstElementChild !== bar) slot.element.prepend(bar);
+      } else if (bar.parentElement !== slot.element) {
+        slot.element.appendChild(bar);
+      }
       return;
     }
 
