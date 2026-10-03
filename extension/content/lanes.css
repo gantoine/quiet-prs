@@ -4,7 +4,7 @@
   z-index: 20;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 2px;
   flex-wrap: wrap;
   margin: 0 0 12px;
   padding: 8px 12px;
@@ -17,12 +17,12 @@
 }
 
 .prlanes-icon {
-  display: none;
+  display: block;
   position: relative;
   line-height: 0;
 }
 
-/* The switches carry their whole meaning in the glyph once the labels go, so give it the room. */
+/* The switches carry their whole meaning in the glyph, so give it the room. */
 .prlanes-toggle .prlanes-icon svg {
   width: 19px;
   height: 19px;
@@ -44,52 +44,6 @@
   border-radius: 1px;
   background: currentColor;
   transform: translateY(-50%) rotate(-45deg);
-}
-
-/* Two compact placements: the rail beside the avatar, and the sticky header. The same
-   icon-only squares, one stack turned on its side. */
-.prlanes-bar--compact {
-  gap: 2px;
-}
-
-.prlanes-bar--compact .prlanes-brand,
-.prlanes-bar--compact .prlanes-label,
-.prlanes-bar--compact .prlanes-dot {
-  display: none;
-}
-
-.prlanes-bar--compact .prlanes-icon {
-  display: block;
-}
-
-.prlanes-bar--compact .prlanes-toggles {
-  gap: 2px;
-  border: 0;
-  background: transparent;
-  padding: 0;
-}
-
-.prlanes-bar--compact .prlanes-toggle,
-.prlanes-bar--compact .prlanes-settings {
-  justify-content: center;
-  width: 30px;
-  height: 30px;
-  margin: 0;
-  padding: 0;
-  border-radius: 4px;
-  color: var(--fgColor-muted, var(--color-fg-muted, #59636e));
-}
-
-.prlanes-bar--compact .prlanes-settings {
-  justify-content: flex-end;
-}
-
-.prlanes-bar--compact .prlanes-toggle--lit {
-  color: var(--prlanes-dot-color, inherit);
-}
-
-.prlanes-bar--compact .prlanes-toggle--on {
-  color: var(--prlanes-dot-color);
 }
 
 .prlanes-bar--rail {
@@ -133,6 +87,11 @@
   margin: 0 0 0 auto;
 }
 
+.prlanes-bar--sticky .prlanes-settings {
+  justify-content: flex-end;
+  width: 24px;
+}
+
 .prlanes-fit {
   box-sizing: border-box;
   width: 100%;
@@ -147,39 +106,29 @@
   margin: 0 0 0 12px;
 }
 
-.prlanes-bar--header .prlanes-brand,
-.prlanes-bar--tabs .prlanes-brand {
-  display: none;
-}
-
-.prlanes-brand {
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  color: var(--fgColor-muted, var(--color-fg-muted, #59636e));
-}
-
 .prlanes-toggles {
   display: flex;
   gap: 2px;
-  padding: 2px;
-  border: 1px solid var(--borderColor-default, var(--color-border-default, #d1d9e0));
-  border-radius: 6px;
-  background: var(--bgColor-default, var(--color-canvas-default, #ffffff));
 }
 
 .prlanes-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin: 0;
+  padding: 0;
   border: 0;
   border-radius: 4px;
   background: transparent;
   color: var(--fgColor-muted, var(--color-fg-muted, #59636e));
-  font: inherit;
-  font-weight: 600;
   cursor: pointer;
+}
+
+/* A lane with something in it wears its colour, so the icon says what the click would take. */
+.prlanes-toggle--lit {
+  color: var(--prlanes-lane-color);
 }
 
 .prlanes-toggle:not(.prlanes-toggle--on):hover {
@@ -189,32 +138,16 @@
 
 .prlanes-toggle--on {
   background: var(--prlanes-tint);
-  color: var(--fgColor-default, var(--color-fg-default, #1f2328));
-}
-
-.prlanes-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--borderColor-default, var(--color-border-default, #8c959f));
-  transition: background-color 120ms ease;
-}
-
-.prlanes-toggle--lit .prlanes-dot {
-  background: var(--prlanes-dot-color);
-}
-
-.prlanes-toggle--on .prlanes-dot {
-  background: var(--prlanes-dot-color);
+  color: var(--prlanes-lane-color);
 }
 
 .prlanes-toggle[data-hide="bots"] {
-  --prlanes-dot-color: var(--fgColor-attention, var(--color-attention-fg, #bf8700));
+  --prlanes-lane-color: var(--fgColor-attention, var(--color-attention-fg, #bf8700));
   --prlanes-tint: var(--bgColor-attention-muted, var(--color-attention-subtle, rgba(191, 135, 0, 0.15)));
 }
 
 .prlanes-toggle[data-hide="events"] {
-  --prlanes-dot-color: var(--fgColor-done, var(--color-done-fg, #8250df));
+  --prlanes-lane-color: var(--fgColor-done, var(--color-done-fg, #8250df));
   --prlanes-tint: var(--bgColor-done-muted, var(--color-done-subtle, rgba(130, 80, 223, 0.15)));
 }
 
@@ -222,21 +155,15 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  margin-left: auto;
-  padding: 4px;
-  border-radius: 6px;
+  width: 30px;
+  height: 30px;
+  border-radius: 4px;
   color: var(--fgColor-muted, var(--color-fg-muted, #59636e));
   line-height: 0;
 }
 
 .prlanes-settings:hover {
-  background: var(--bgColor-neutral-muted, var(--color-neutral-muted, rgba(129, 139, 152, 0.12)));
-  color: var(--fgColor-default, var(--color-fg-default, #1f2328));
-}
-
-.prlanes-bar--header .prlanes-settings,
-.prlanes-bar--tabs .prlanes-settings {
-  margin-left: 0;
+  color: var(--fgColor-accent, var(--color-accent-fg, #0969da));
 }
 
 [data-prlanes-bots="hide"] [data-prlanes-actor="bot"]:not([data-prlanes-pin="1"]):not([data-prlanes-fold]),

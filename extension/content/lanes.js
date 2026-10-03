@@ -39,7 +39,6 @@
   const COMMENT_ACTIONS_SELECTOR = '.timeline-comment-actions, [data-testid="comment-header-right-side-items"]';
   const COMMENT_HEADER_SELECTOR = '.timeline-comment-header, .review-comment-header, [data-testid="comment-header"]';
 
-  const COMPACT_SLOTS = ['rail', 'header', 'state'];
 
   const STRIP_CLASS = 'prlanes-strip';
   const STRIP_CHILD_SELECTOR = `:scope > .${STRIP_CLASS}`;
@@ -300,15 +299,12 @@
       class: TOGGLE_CLASS,
       'data-hide': name
     }, [
-      make('span', { class: 'prlanes-dot' }),
-      make('span', { class: 'prlanes-icon' }, [icon(name)]),
-      make('span', { class: 'prlanes-label' })
+      make('span', { class: 'prlanes-icon' }, [icon(name)])
     ]);
   }
 
   function buildBar() {
     const element = make('div', { class: 'prlanes-bar', role: 'group', 'aria-label': 'Quiet this conversation' }, [
-      make('span', { class: 'prlanes-brand' }, ['Quiet']),
       make('div', { class: 'prlanes-toggles' }, [toggle('bots'), toggle('events')]),
       make('a', {
         class: 'prlanes-settings',
@@ -414,7 +410,7 @@
     bar.classList.toggle('prlanes-bar--tabs', variant === 'tabs');
     bar.classList.toggle('prlanes-bar--rail', variant === 'rail');
     bar.classList.toggle('prlanes-bar--state', variant === 'state');
-    bar.classList.toggle('prlanes-bar--compact', COMPACT_SLOTS.indexOf(variant) !== -1);
+    bar.classList.toggle('prlanes-bar--sticky', Boolean(slot && slot.fit));
 
     fitTo(slot && slot.fit ? slot.element : null);
 
@@ -438,7 +434,7 @@
       const label = wording(name);
       button.classList.toggle('prlanes-toggle--on', hide[name]);
       button.classList.toggle('prlanes-toggle--lit', counts[name] > 0);
-      setText(button.querySelector('.prlanes-label'), label);
+      setAttr(button, 'aria-label', label);
       setAttr(button, 'title', `${label} (${name[0].toUpperCase()})`);
     }
   }

@@ -141,7 +141,7 @@ const SNAPSHOT = `(() => {
       button.dataset.hide,
       {
         on: button.classList.contains('prlanes-toggle--on'),
-        label: button.querySelector('.prlanes-label').textContent,
+        label: button.getAttribute('aria-label'),
         title: button.getAttribute('title'),
         lit: button.classList.contains('prlanes-toggle--lit')
       }
@@ -226,7 +226,7 @@ if (process.argv.includes('--serve')) {
     assert.equal(quiet.railTop, '52px', 'the rail sits 12px under a 40px avatar');
     assert.equal(quiet.icons, 2, 'each button carries an icon');
     assert.equal(quiet.gearIcon, true, 'settings is a gear icon');
-    assert.equal(quiet.barText, 'QuietShow botsHide events', 'the bar carries no counts');
+    assert.equal(quiet.barText, '', 'the bar is icons only, with no counts or labels');
 
     // Hiding a bot reviewer takes its whole row, not just the name: no orphan status icons.
     assert.equal(quiet.orphans.status, false, 'the review-status icon goes with the reviewer it belongs to');
