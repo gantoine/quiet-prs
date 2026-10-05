@@ -13,7 +13,7 @@ jobs:
 
   firefox:
     needs: [test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
 
@@ -28,7 +28,7 @@ jobs:
 
   chrome:
     needs: [test]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
 
@@ -47,7 +47,7 @@ jobs:
 
   release:
     needs: [firefox, chrome]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
 
