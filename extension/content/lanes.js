@@ -29,6 +29,7 @@
   let lastUrl = location.href;
 
   const STICKY_HEADER_SELECTOR = '[class*="stickyHeader" i], .gh-header-sticky, [data-testid*="sticky-header"]';
+  const ISSUE_STICKY_ROW_SELECTOR = '[data-testid="issue-metadata-sticky"] [class*="stickyContent"]';
   const HEADER_SELECTOR = '[class*="PullRequestHeader"], [class*="PageHeader-PageHeader"], .gh-header-show';
   const HEADER_SLOT_SELECTOR = '[class*="PageHeader-TitleArea"], .gh-header-title';
   const TAB_NAV_SELECTOR = 'nav[class*="TabNav"], nav.tabnav-tabs, .tabnav-tabs';
@@ -346,9 +347,20 @@
     return badge.closest(STATE_ROW_SELECTOR) || badge.parentElement;
   }
 
+  // The issue's sticky header stacks the title over its type and labels, so riding the end
+  // of the title line leaves the bar high above the copy button. It sits in the row instead,
+  // just before the button, both centred on the whole header.
+  function issueStickyRow() {
+    const row = document.querySelector(ISSUE_STICKY_ROW_SELECTOR);
+    return visible(row) ? row : null;
+  }
+
   function barSlot() {
+    const issueRow = issueStickyRow();
+    if (issueRow) return { element: issueRow, variant: 'issue', sticky: true, before: issueRow.lastElementChild };
+
     const sticky = document.querySelector(STICKY_HEADER_SELECTOR);
-    if (visible(sticky)) return { element: sticky.querySelector(HEADER_SLOT_SELECTOR) || sticky, variant: 'header', fit: true };
+    if (visible(sticky)) return { element: sticky.querySelector(HEADER_SLOT_SELECTOR) || sticky, variant: 'header', sticky: true, fit: true };
 
     const diff = diffstat();
     if (diff) return { element: diff, variant: 'diff', lead: true };
@@ -397,12 +409,15 @@
     bar.classList.toggle('prlanes-bar--tabs', variant === 'tabs');
     bar.classList.toggle('prlanes-bar--diff', variant === 'diff');
     bar.classList.toggle('prlanes-bar--state', variant === 'state');
-    bar.classList.toggle('prlanes-bar--sticky', Boolean(slot && slot.fit));
+    bar.classList.toggle('prlanes-bar--issue', variant === 'issue');
+    bar.classList.toggle('prlanes-bar--sticky', Boolean(slot && slot.sticky));
 
     fitTo(slot && slot.fit ? slot.element : null);
 
     if (slot) {
-      if (slot.lead) {
+      if (slot.before) {
+        if (bar.nextElementSibling !== slot.before) slot.element.insertBefore(bar, slot.before);
+      } else if (slot.lead) {
         if (slot.element.firstElementChild !== bar) slot.element.prepend(bar);
       } else if (bar.parentElement !== slot.element) {
         slot.element.appendChild(bar);

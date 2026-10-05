@@ -66,6 +66,7 @@
 }
 
 .prlanes-bar--header,
+.prlanes-bar--issue,
 .prlanes-bar--tabs {
   position: static;
   padding: 0;
@@ -73,6 +74,10 @@
   background: transparent;
   align-self: center;
   flex-wrap: nowrap;
+}
+
+.prlanes-bar--issue {
+  margin: 0;
 }
 
 .prlanes-bar--header {
