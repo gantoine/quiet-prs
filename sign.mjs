@@ -63,7 +63,7 @@ if (channel === 'listed') {
 if (dryRun) {
   console.log(`version ${manifest.version}, signing ${path.relative(root, sourceDir)} as a ${channel} add-on`);
   console.log(`would run: npx ${args.join(' ')}`);
-  console.log(`credentials: WEB_EXT_API_KEY=${apiKey.slice(0, 6)}… (${apiSecret.length}-character secret)`);
+  console.log(`credentials: ${process.env.WEB_EXT_API_KEY ? 'WEB_EXT_API_KEY/WEB_EXT_API_SECRET' : 'AMO_JWT_ISSUER/AMO_JWT_SECRET'} are set`);
   console.log(`artifacts:  signed/`);
   process.exit(0);
 }
