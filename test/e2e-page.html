@@ -40,8 +40,16 @@
             <a href="/apps/coderabbitai"><img class="avatar" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="coderabbitai" /></a>
             <a class="assignee" href="/apps/coderabbitai">coderabbitai[bot]</a>
           </span>
-          <a id="review-status-coderabbitai" class="flex-order-1" data-role="bot-status" href="/PostHog/posthog/pull/1/files/abc"><span class="reviewers-status-icon">&#9744;</span></a>
+          <a id="review-status-coderabbitai" class="flex-order-1" data-role="bot-status" href="/PostHog/posthog/pull/1/files/abc"><span class="reviewers-status-icon"><svg class="octicon octicon-comment" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path d="M1 2.75C1 1.784 1.784 1 2.75 1h10.5c.966 0 1.75.784 1.75 1.75v7.5A1.75 1.75 0 0 1 13.25 12H9.06l-2.573 2.573A1.458 1.458 0 0 1 4 13.543V12H2.75A1.75 1.75 0 0 1 1 10.25Z"></path></svg></span></a>
           <tool-tip for="review-status-coderabbitai" data-role="bot-tooltip">coderabbitai[bot] left review comments</tool-tip>
+        </div>
+        <div class="d-flex flex-items-center mb-2" data-row="reviewer-approving-bot">
+          <span class="d-flex min-width-0" data-assignee-name="stamphog[bot]">
+            <a href="/apps/stamphog"><img class="avatar" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="stamphog" /></a>
+            <a class="assignee" href="/apps/stamphog">stamphog[bot]</a>
+          </span>
+          <a id="review-status-stamphog" class="flex-order-1" href="/PostHog/posthog/pull/1/files/abc"><span class="reviewers-status-icon text-center"><svg class="octicon octicon-check color-fg-success" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg></span></a>
+          <tool-tip for="review-status-stamphog">stamphog[bot] approved these changes</tool-tip>
         </div>
         <div class="d-flex flex-items-center mb-2" data-row="reviewer-human">
           <span class="d-flex min-width-0" data-assignee-name="gantoine">
@@ -324,6 +332,116 @@
               <a class="author" href="/apps/copilot-pull-request-reviewer">Copilot</a>
               <span class="Label">AI</span>
               <span>lite review requested due to automatic review settings</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="js-timeline-item" data-row="human-approval" data-gid="PRR_kwDOaaaaaaa1">
+          <div class="TimelineItem">
+            <div class="TimelineItem-badge"><svg class="octicon octicon-check" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg></div>
+            <div class="TimelineItem-body">
+              <strong><a class="author" href="/gantoine">gantoine</a></strong> approved these changes
+            </div>
+          </div>
+        </div>
+
+        <div class="js-timeline-item" data-row="human-changes" data-gid="PRR_kwDOaaaaaaa2">
+          <div class="TimelineItem">
+            <div class="TimelineItem-badge"><svg class="octicon octicon-file-diff" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path d="M1 1.75C1 .784 1.784 0 2.75 0h7.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16H2.75A1.75 1.75 0 0 1 1 14.25Z"></path></svg></div>
+            <div class="TimelineItem-body">
+              <strong><a class="author" href="/gantoine">gantoine</a></strong> requested changes
+            </div>
+          </div>
+        </div>
+
+        <div class="js-timeline-item" data-row="human-reviewed" data-gid="PRR_kwDOaaaaaaa3">
+          <div class="TimelineItem">
+            <div class="TimelineItem-badge"><svg class="octicon octicon-eye" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path d="M8 2c1.981 0 3.671.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.45.678-1.367 1.932-2.637 3.023C11.67 13.008 9.981 14 8 14Z"></path></svg></div>
+            <div class="TimelineItem-body">
+              <strong><a class="author" href="/gantoine">gantoine</a></strong> reviewed
+            </div>
+          </div>
+        </div>
+
+        <div class="js-timeline-item" data-row="gate-note">
+          <div class="TimelineItem">
+            <div class="timeline-comment js-comment-container">
+              <div class="timeline-comment-header">
+                <a class="author" href="/apps/review-gate">review-gate</a>
+                <span class="Label">bot</span> commented
+              </div>
+              <div class="comment-body">Checking the gate.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="js-timeline-item" data-row="bot-approval" data-gid="PRR_kwDOaaaaaaa4">
+          <div class="TimelineItem">
+            <div class="TimelineItem-badge"><svg class="octicon octicon-check" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path d="M13.78 4.22a.75.75 0 0 1 0 1.06l-7.25 7.25a.75.75 0 0 1-1.06 0L2.22 9.28a.75.75 0 0 1 1.06-1.06L6 10.94l6.72-6.72a.75.75 0 0 1 1.06 0Z"></path></svg></div>
+            <div class="timeline-comment js-comment-container">
+              <div class="timeline-comment-header">
+                <a class="author" href="/apps/review-gate">review-gate</a>
+                <span class="Label">bot</span> approved these changes
+              </div>
+              <div class="comment-body">Nothing blocking, good to merge.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="js-timeline-item" data-row="bot-changes" data-gid="PRR_kwDOaaaaaaa5">
+          <div class="TimelineItem">
+            <div class="TimelineItem-badge"><svg class="octicon octicon-file-diff" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path d="M1 1.75C1 .784 1.784 0 2.75 0h7.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v9.586A1.75 1.75 0 0 1 13.25 16H2.75A1.75 1.75 0 0 1 1 14.25Z"></path></svg></div>
+            <div class="TimelineItem-body">
+              <strong><a class="author" href="/apps/merge-guard">merge-guard</a></strong>
+              <span class="Label">bot</span> requested changes
+            </div>
+          </div>
+        </div>
+
+        <div class="js-timeline-item" data-row="bot-suggested" data-gid="PRR_kwDOaaaaaaa9">
+          <div class="TimelineItem">
+            <div aria-label="Only reviews by reviewers with write access count toward mergeability" class="TimelineItem-badge"><svg class="octicon octicon-eye" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path d="M8 2c1.981 0 3.671.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.45.678-1.367 1.932-2.637 3.023C11.67 13.008 9.981 14 8 14Z"></path></svg></div>
+            <div class="TimelineItem-body d-flex">
+              <div class="flex-auto">
+                <strong><a class="author" href="/apps/security-scout">security-scout</a> <span class="Label">Bot</span></strong>
+                suggested changes
+                <span class="color-fg-muted"><a href="#pullrequestreview-9">Oct 15, 2026</a></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="js-timeline-item" data-row="bot-reviewed" data-gid="PRR_kwDOaaaaaaa6">
+          <div class="TimelineItem">
+            <div class="TimelineItem-badge"><svg class="octicon octicon-eye" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path d="M8 2c1.981 0 3.671.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.45.678-1.367 1.932-2.637 3.023C11.67 13.008 9.981 14 8 14Z"></path></svg></div>
+            <div class="timeline-comment js-comment-container">
+              <div class="timeline-comment-header">
+                <a class="author" href="/apps/lint-helper">lint-helper</a>
+                <span class="Label">bot</span> reviewed
+              </div>
+              <div class="comment-body">Two style nits below.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="js-timeline-item" data-row="bot-image-review" data-gid="PRR_kwDOaaaaaaa7">
+          <div class="TimelineItem">
+            <div class="TimelineItem-badge"><svg class="octicon octicon-eye" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path d="M8 2c1.981 0 3.671.992 4.933 2.078 1.27 1.091 2.187 2.345 2.637 3.023a1.62 1.62 0 0 1 0 1.798c-.45.678-1.367 1.932-2.637 3.023C11.67 13.008 9.981 14 8 14Z"></path></svg></div>
+            <div class="timeline-comment js-comment-container">
+              <div class="timeline-comment-header">
+                <a class="author" href="/apps/badge-reporter">badge-reporter</a>
+                <span class="Label">bot</span> reviewed
+              </div>
+              <div class="comment-body"><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt="" /></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="js-timeline-item" data-row="human-odd-review" data-gid="PRR_kwDOaaaaaaa8">
+          <div class="TimelineItem">
+            <div class="TimelineItem-badge"><svg class="octicon octicon-x" aria-hidden="true" viewBox="0 0 16 16" width="16" height="16"><path d="M3.72 3.72a.75.75 0 0 1 1.06 0L8 6.94l3.22-3.22a.75.75 0 1 1 1.06 1.06L9.06 8l3.22 3.22a.75.75 0 1 1-1.06 1.06L8 9.06l-3.22 3.22a.75.75 0 0 1-1.06-1.06L6.94 8 3.72 4.78a.75.75 0 0 1 0-1.06Z"></path></svg></div>
+            <div class="TimelineItem-body">
+              <strong><a class="author" href="/gantoine">gantoine</a></strong> reviewed
             </div>
           </div>
         </div>

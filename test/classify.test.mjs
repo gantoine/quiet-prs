@@ -77,9 +77,13 @@ test('the settings schema is exported for both the content script and the option
     'forceHumans',
     'heuristics',
     'hideResolvedThreads',
+    'keepBotApprovals',
+    'keepBotChangeRequests',
+    'keepBotReviewComments',
     'rememberPerRepo'
   ]);
   assert.ok(lanes.CLASSIFICATION_KEYS.every((key) => key in lanes.DEFAULTS));
+  assert.ok(Object.values(lanes.REVIEW_KEEP_SETTINGS).every((key) => key in lanes.DEFAULTS));
 });
 
 test('apps dropped from the built-in list are still caught by their bot signals', () => {

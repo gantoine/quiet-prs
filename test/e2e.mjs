@@ -275,6 +275,40 @@ if (process.argv.includes('--serve')) {
     assert.deepEqual(quiet.rows['copilot-prompt'], uncollapsed({ actor: 'bot', form: 'chrome', pinned: false, visible: false }),
       'the "Mention @copilot" note goes with the bots');
 
+    // A review is somebody saying something, even an approval that came with no comment.
+    assert.deepEqual(quiet.rows['human-approval'], uncollapsed({ actor: 'human', form: 'comment', pinned: false, visible: true }));
+    assert.deepEqual(quiet.rows['human-changes'], uncollapsed({ actor: 'human', form: 'comment', pinned: false, visible: true }));
+    assert.deepEqual(quiet.rows['human-reviewed'], uncollapsed({ actor: 'human', form: 'comment', pinned: false, visible: true }));
+    assert.deepEqual(quiet.rows['human-odd-review'], uncollapsed({ actor: 'human', form: 'comment', pinned: false, visible: true }),
+      'a review whose badge is unfamiliar is still a review');
+    // A bot's approvals and change requests keep their verdict in view by default; the body folds.
+    assert.deepEqual(quiet.rows['bot-approval'], { actor: 'bot', form: 'comment', pinned: false, visible: true, fold: 'strip' },
+      'a kept bot approval folds while the bots are hidden');
+    assert.equal(quiet.strips['bot-approval'].preview, 'approved these changes', 'to its verdict, not the opening of its body');
+    assert.equal(quiet.strips['bot-approval'].title, 'Show this review');
+    assert.equal(quiet.strips['bot-approval'].bodyHidden, true, 'the body is what folds');
+    assert.equal(quiet.rows['gate-note'].fold, 'strip', 'a comment from the same bot just before it keeps its own strip');
+    assert.equal(quiet.strips['gate-note'].more, '', 'and does not swallow the verdict into its run');
+    assert.deepEqual(quiet.rows['bot-changes'], { actor: 'bot', form: 'comment', pinned: false, visible: true, fold: 'strip' },
+      'and so does a bot change request with no comment');
+    assert.equal(quiet.strips['bot-changes'].preview, 'requested changes');
+    assert.equal(quiet.rows['bot-suggested'].fold, 'strip', 'a change request from a bot without write access is kept too');
+    assert.equal(quiet.strips['bot-suggested'].preview, 'requested changes', 'though GitHub draws it with an eye');
+    // The sidebar agrees: a bot whose approval is kept stays among the reviewers.
+    assert.deepEqual(quiet.rows['reviewer-approving-bot'], uncollapsed({ actor: 'bot', form: 'reviewer', pinned: false, visible: true }),
+      'a kept bot approval stays in the Reviewers sidebar too');
+    assert.deepEqual(quiet.rows['bot-reviewed'], { actor: 'bot', form: 'comment', pinned: false, visible: true, fold: 'strip' },
+      'a bot review that only commented folds like its comments');
+    assert.equal(quiet.strips['bot-image-review'].preview, 'reviewed', 'a review with no words in its body says what it did');
+
+    // A kept review opens like any bot comment, and has a Hide to fold it again.
+    await evaluate('document.querySelector(\'[data-row="bot-approval"] > .prlanes-strip\').click()');
+    const verdictOpen = await until('a kept review to open', (state) => state.rows['bot-approval'].fold === 'open');
+    assert.equal(verdictOpen.strips['bot-approval'].bodyHidden, false, 'its body is there');
+    assert.equal(verdictOpen.strips['bot-approval'].hideShown, true, 'with a Hide');
+    await evaluate('document.querySelector(\'[data-row="bot-approval"] .prlanes-hide\').click()');
+    await until('the Hide to fold the kept review back', (state) => state.rows['bot-approval'].fold === 'strip');
+
     // Commits belong to nobody, so hiding bots never takes them.
     assert.deepEqual(quiet.rows['human-commit'], uncollapsed({ actor: 'none', form: 'commit', pinned: false, visible: true }));
     assert.deepEqual(quiet.rows['bot-commit'], uncollapsed({ actor: 'none', form: 'commit', pinned: false, visible: true }));
@@ -373,6 +407,25 @@ if (process.argv.includes('--serve')) {
     assert.equal(still.rows['pr-body'].visible, true, 'comments are untouched by the events button');
     assert.equal(still.rows['spoof-comment'].visible, true, 'still: spoof visible');
     assert.equal(still.rows['bot-comment'].fold, 'strip', 'and the bots button is still doing its own job');
+    assert.equal(still.rows['human-approval'].visible, true, 'an approval is a review, not an event');
+    assert.equal(still.rows['human-changes'].visible, true, 'and so is a change request');
+    assert.equal(still.rows['human-odd-review'].visible, true, 'and a review whatever its badge');
+    assert.equal(still.rows['bot-approval'].visible, true, 'a kept bot approval ignores the events button too');
+
+    // Each kind of bot review is kept or folded on its own.
+    await settings({ keepBotApprovals: false, keepBotChangeRequests: false, keepBotReviewComments: true });
+    const swapped = await until('the kept bot reviews to swap', (state) => state.strips['bot-approval'].preview === 'Nothing blocking, good to merge.');
+    assert.equal(swapped.rows['bot-approval'].fold, 'gone', 'an approval no longer kept joins the run of the comment before it');
+    assert.equal(swapped.strips['gate-note'].more, '+1 more');
+    assert.equal(swapped.rows['reviewer-approving-bot'].visible, false, 'and its sidebar row goes with the bots');
+    assert.equal(swapped.rows['bot-changes'].fold, 'strip', 'a bot change request still folds once it is not kept');
+    assert.equal(swapped.strips['bot-changes'].preview, 'requested changes', 'and its strip says what it did, having no comment');
+    assert.equal(swapped.strips['bot-reviewed'].preview, 'reviewed', 'a kept comment-only review folds to its verdict');
+    assert.equal(swapped.rows['reviewer-bot'].visible, true, 'and the bot that left review comments stays in the sidebar');
+    assert.equal(swapped.rows['bot-comment'].fold, 'strip', 'while ordinary bot comments still fold');
+    await settings({ keepBotApprovals: true, keepBotChangeRequests: true, keepBotReviewComments: false });
+    await until('the default bot reviews to come back', (state) =>
+      state.strips['bot-approval'].preview === 'approved these changes' && state.strips['bot-reviewed'].preview === 'Two style nits below.');
 
     await clickToggle('bots');
     const eventsOnly = await until('the bots to come back while events stay hidden', (state) => !state.hiding.bots.on);
@@ -444,6 +497,8 @@ if (process.argv.includes('--serve')) {
     assert.equal(gone.rows['bot-comment'].fold, null);
     assert.equal(gone.rows['human-thread'].visible, true, 'people are untouched either way');
     assert.equal(gone.hiding.bots.lit, true, 'the button still knows there is something to hide');
+    assert.equal(gone.rows['bot-approval'].fold, 'strip', 'a kept review still leaves its verdict behind');
+    assert.equal(gone.strips['bot-approval'].preview, 'approved these changes');
     await settings({ collapseBots: true });
     const back = await until('the strips to come back', (state) => state.rows['bot-comment'].fold === 'strip');
     assert.equal(back.strips['bot-comment'].preview, 'All checks have passed.');

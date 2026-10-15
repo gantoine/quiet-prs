@@ -73,13 +73,18 @@
   }
 
   // A bot comment you have hidden still leaves a mark: one line you can click to bring them back.
+  // A review you keep always does, collapsing or not, since its verdict is the part worth seeing.
   function strippable(row) {
     return (
-      settings.collapseBots &&
+      (settings.collapseBots || kept(row)) &&
       row.dataset.prlanesForm === 'comment' &&
       row.dataset.prlanesPin !== '1' &&
       !TABLE_TAGS.test(row.tagName)
     );
+  }
+
+  function kept(row) {
+    return row.dataset.prlanesKeep === '1';
   }
 
   function botComment(row) {
@@ -125,14 +130,17 @@
       ? make('img', { class: 'prlanes-strip-face', src: kind.avatar, alt: '' })
       : make('span', { class: 'prlanes-strip-face' }, [icon(kind.actor)]);
 
+    // A kept review folds to its verdict alone: the body is what the bots button is hiding.
+    const verdict = kept(row);
+
     return make('button', {
       type: 'button',
-      class: STRIP_CLASS,
-      title: 'Show this comment'
+      class: verdict ? `${STRIP_CLASS} ${STRIP_CLASS}--${kind.review}` : STRIP_CLASS,
+      title: verdict ? 'Show this review' : 'Show this comment'
     }, [
       face,
       make('span', { class: 'prlanes-strip-who' }, [kind.login || NOBODY[kind.actor]]),
-      make('span', { class: 'prlanes-strip-preview' }, [lanes.commentPreview(row)]),
+      make('span', { class: 'prlanes-strip-preview' }, [verdict ? lanes.reviewVerdict(kind.review) : lanes.commentPreview(row, kind.review)]),
       make('span', { class: 'prlanes-strip-more' }),
       make('span', { class: 'prlanes-strip-hint' }, ['Show'])
     ]);
@@ -165,6 +173,7 @@
   }
 
   // Back-to-back comments from the same bot are one thing to read, so they are one thing to fold.
+  // A kept review stands alone, or its verdict would vanish into the strip of the comment above.
   function foldRuns(rows) {
     let index = 0;
 
@@ -177,8 +186,11 @@
       }
 
       const login = leader.dataset.prlanesLogin || '';
+      const review = kept(leader);
       let end = index + 1;
-      while (end < rows.length && botComment(rows[end]) && (rows[end].dataset.prlanesLogin || '') === login) end += 1;
+      if (!review) {
+        while (end < rows.length && botComment(rows[end]) && !kept(rows[end]) && (rows[end].dataset.prlanesLogin || '') === login) end += 1;
+      }
 
       const run = end - index;
       const open = wantsOpen(leader);
@@ -187,7 +199,7 @@
       setText(leader.querySelector('.prlanes-strip-more'), run > 1 ? `+${run - 1} more` : '');
       const control = leader.querySelector(`.${HIDE_CLASS}`);
       if (control) {
-        setAttr(control, 'title', run > 1 ? `Hide these ${run} comments` : 'Hide this comment');
+        setAttr(control, 'title', run > 1 ? `Hide these ${run} comments` : `Hide this ${review ? 'review' : 'comment'}`);
         if (open) placeHide(leader, control);
       }
 
@@ -216,6 +228,8 @@
         else delete row.dataset.prlanesLogin;
         if (lanes.isPrBody(row)) setData(row, 'prlanesPin', '1');
         else delete row.dataset.prlanesPin;
+        if (kind.actor === 'bot' && settings[lanes.REVIEW_KEEP_SETTINGS[kind.review]]) setData(row, 'prlanesKeep', '1');
+        else delete row.dataset.prlanesKeep;
         fillStrip(row, kind);
       }
 
@@ -496,7 +510,7 @@
   }
 
   // Strips are built during classification, so changing your mind about them means classifying again.
-  const RECLASSIFY_KEYS = lanes.CLASSIFICATION_KEYS.concat(['collapseBots']);
+  const RECLASSIFY_KEYS = lanes.CLASSIFICATION_KEYS.concat(['collapseBots'], Object.values(lanes.REVIEW_KEEP_SETTINGS));
 
   function invalidateRules() {
     rules = lanes.buildRules(settings);

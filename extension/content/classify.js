@@ -7,6 +7,9 @@
     collapseBots: true,
     rememberPerRepo: false,
     hideResolvedThreads: false,
+    keepBotApprovals: true,
+    keepBotChangeRequests: true,
+    keepBotReviewComments: false,
     extraBots: '',
     forceHumans: '',
     heuristics: true
@@ -111,6 +114,31 @@
   const COMMIT_ICON_SELECTOR = '.octicon-git-commit';
   const COMMIT_GID = /^C_/;
 
+  // A review row carries a PRR_ id, and its badge says how it ended.
+  const REVIEW_GID = /^PRR_/;
+  const REVIEW_ICONS = [
+    ['approved', '.octicon-check'],
+    ['changes', '.octicon-file-diff'],
+    ['commented', '.octicon-eye']
+  ];
+
+  // A reviewer without write access gets the eye whatever they decided, so the header line has to
+  // say it: GitHub writes "suggested changes" where a reviewer who counts "requested changes".
+  const REVIEW_WORDS = [
+    ['approved', /\bapproved these changes\b/],
+    ['changes', /\b(?:requested|suggested) changes\b/]
+  ];
+
+  // An approval needs no comment, so its strip says what it did instead.
+  const REVIEW_WORDING = { approved: 'approved these changes', changes: 'requested changes', commented: 'reviewed' };
+
+  // Which setting keeps each kind of bot review in view while the bots are hidden.
+  const REVIEW_KEEP_SETTINGS = {
+    approved: 'keepBotApprovals',
+    changes: 'keepBotChangeRequests',
+    commented: 'keepBotReviewComments'
+  };
+
   const PR_BODY_SELECTOR = '[data-testid="issue-body"], [id^="issue-"]';
   const PR_BODY_ID = /^issue-\d+$/;
 
@@ -138,6 +166,11 @@
   const REVIEWER_LINK_SELECTOR = 'a[href^="/apps/"], a[data-hovercard-url], a.assignee, a[href^="/orgs/"]';
 
   const ASSIGNED_SELECTOR = '[data-assignee-name]';
+
+  // A reviewer's status in the sidebar is the same verdict as their review, drawn with a comment
+  // bubble where the timeline has an eye. Awaiting a review is a dot, and is no verdict at all.
+  const REVIEWER_STATUS_SELECTOR = '.reviewers-status-icon';
+  const REVIEWER_ICONS = REVIEW_ICONS.concat([['commented', '.octicon-comment']]);
 
   const THREAD_SELECTOR = [
     '.js-resolvable-timeline-thread-container',
@@ -293,13 +326,45 @@
     return hasCommentBody(row) || Boolean(row.querySelector(THREAD_SELECTOR));
   }
 
-  function isCommit(row) {
-    const gid = row.getAttribute ? row.getAttribute('data-gid') : '';
-    if (gid && COMMIT_GID.test(gid)) return true;
+  function rowGid(row) {
+    return (row.getAttribute && row.getAttribute('data-gid')) || '';
+  }
 
+  function timelineBadge(row) {
     const item = row.matches && row.matches('.TimelineItem') ? row : row.querySelector('.TimelineItem');
-    const badge = item && item.querySelector(TIMELINE_BADGE_SELECTOR);
+    return item && item.querySelector(TIMELINE_BADGE_SELECTOR);
+  }
+
+  function isCommit(row) {
+    if (COMMIT_GID.test(rowGid(row))) return true;
+
+    const badge = timelineBadge(row);
     return Boolean(badge && badge.querySelector(COMMIT_ICON_SELECTOR));
+  }
+
+  // The outcome named by whichever of the icons the element draws.
+  function iconOutcome(element, icons, fallback) {
+    const match = element && icons.find(([, selector]) => element.querySelector(selector));
+    return match ? match[0] : fallback;
+  }
+
+  // The words beside the reviewer's name, without the name, the timestamp or anything they wrote.
+  function reviewWords(badge) {
+    const body = badge && badge.parentElement && badge.parentElement.querySelector(':scope > .TimelineItem-body');
+    if (!body) return '';
+    const line = body.querySelector(':scope > div') || body;
+    const said = Array.from(line.childNodes, (node) => (node.nodeType === 3 ? node.textContent : '')).join(' ');
+    const match = REVIEW_WORDS.find(([, words]) => words.test(said));
+    return match ? match[0] : '';
+  }
+
+  function reviewOutcome(row) {
+    if (!REVIEW_GID.test(rowGid(row))) return '';
+
+    // A badge this cannot read is still a review, so it counts as the plainest kind.
+    const badge = timelineBadge(row);
+    const outcome = iconOutcome(badge, REVIEW_ICONS, 'commented');
+    return outcome === 'commented' ? reviewWords(badge) || outcome : outcome;
   }
 
   function isPrBody(row) {
@@ -309,7 +374,10 @@
   }
 
   function classifyRow(row, rules) {
-    if (carriesComment(row)) {
+    // A review is somebody saying something even when an approval left no comment, so it is
+    // never a timeline event.
+    const review = reviewOutcome(row);
+    if (review || carriesComment(row)) {
       const nodes = commentNodes(row);
       // Only a lone comment owns the row's rail; in a thread each reply carries its own avatar.
       const rail = nodes.length === 1 ? row.querySelector(AVATAR_RAIL_SELECTOR) : null;
@@ -324,7 +392,7 @@
       // The face on a collapsed row has to be the author it speaks for, not whoever posted first.
       const spoken = written[kinds.indexOf(actor)];
 
-      return { actor, form: 'comment', login: spoken.author.login, avatar: spoken.author.avatarSrc };
+      return { actor, form: 'comment', review, login: spoken.author.login, avatar: spoken.author.avatarSrc };
     }
 
     if (row.querySelector(COMPOSER_SELECTOR)) return { actor: 'none', form: 'chrome' };
@@ -344,9 +412,14 @@
     return { actor: classifyAuthor(author, rules), form: 'event' };
   }
 
-  function commentPreview(row) {
+  function reviewVerdict(review) {
+    return REVIEW_WORDING[review] || '';
+  }
+
+  function commentPreview(row, review) {
     const body = row.querySelector(COMMENT_BODY_SELECTOR);
-    const text = body ? (body.textContent || '').replace(/\s+/g, ' ').trim() : '';
+    const said = body ? (body.textContent || '').replace(/\s+/g, ' ').trim() : '';
+    const text = said || reviewVerdict(review);
     return text.length > PREVIEW_LIMIT ? `${text.slice(0, PREVIEW_LIMIT).trimEnd()}\u2026` : text;
   }
 
@@ -401,7 +474,8 @@
 
   function classifyReviewer(row, rules) {
     const author = readIdentity(row, row.querySelector(REVIEWER_LINK_SELECTOR), null);
-    return { actor: classifyAuthor(author, rules), form: 'reviewer' };
+    const review = iconOutcome(row.querySelector(REVIEWER_STATUS_SELECTOR), REVIEWER_ICONS, '');
+    return { actor: classifyAuthor(author, rules), form: 'reviewer', review };
   }
 
   function outermost(elements, root) {
@@ -459,6 +533,7 @@
   root.PRLanes = Object.assign(root.PRLanes || {}, {
     CLASSIFICATION_KEYS,
     DEFAULTS,
+    REVIEW_KEEP_SETTINGS,
     botsMissedByHeuristics,
     buildRules,
     classifyAuthor,
@@ -473,6 +548,7 @@
     normalizeLogin,
     parseLoginList,
     resolvableThreads,
+    reviewVerdict,
     reviewerRows,
     threadRows,
     timelineRows

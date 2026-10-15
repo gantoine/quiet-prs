@@ -164,7 +164,7 @@
   color: var(--fgColor-accent, var(--color-accent-fg, #0969da));
 }
 
-[data-prlanes-bots="hide"] [data-prlanes-actor="bot"]:not([data-prlanes-pin="1"]):not([data-prlanes-fold]),
+[data-prlanes-bots="hide"] [data-prlanes-actor="bot"]:not([data-prlanes-pin="1"]):not([data-prlanes-keep="1"]):not([data-prlanes-fold]),
 [data-prlanes-events="hide"] :is([data-prlanes-form="event"], [data-prlanes-form="commit"]):not([data-prlanes-pin="1"]),
 [data-prlanes-threads="hide"] [data-prlanes-resolved="1"] {
   display: none !important;
@@ -231,6 +231,15 @@
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+/* A kept review's verdict reads in the colour GitHub gives it. */
+.prlanes-strip--approved .prlanes-strip-preview {
+  color: var(--fgColor-success, var(--color-success-fg, #1a7f37));
+}
+
+.prlanes-strip--changes .prlanes-strip-preview {
+  color: var(--fgColor-danger, var(--color-danger-fg, #d1242f));
 }
 
 .prlanes-strip-hint {
