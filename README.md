@@ -74,16 +74,16 @@ When the release's Chrome job fails with `invalid_grant` ("Token has been expire
 1. Open this in a browser, signed in as the account that owns the Web Store item, with your client id filled in:
 
    ```
-   https://accounts.google.com/o/oauth2/v2/auth?response_type=code&access_type=offline&prompt=consent&scope=https://www.googleapis.com/auth/chromewebstore&redirect_uri=http://localhost:8818&client_id=CLIENT_ID
+   https://accounts.google.com/o/oauth2/v2/auth?response_type=code&access_type=offline&prompt=consent&scope=https://www.googleapis.com/auth/chromewebstore&redirect_uri=http://127.0.0.1:8123&client_id=CLIENT_ID
    ```
 
-   After you click **Allow**, the browser lands on a localhost page that does not load. Copy the `code` parameter from the address bar.
+   After you click **Allow**, the browser lands on a 127.0.0.1 page that does not load. Copy the `code` parameter from the address bar.
 2. Exchange the code for a refresh token:
 
    ```bash
    curl -s https://oauth2.googleapis.com/token -d grant_type=authorization_code \
      -d client_id=CLIENT_ID -d client_secret=CLIENT_SECRET \
-     -d redirect_uri=http://localhost:8818 -d code=CODE
+     -d redirect_uri=http://127.0.0.1:8123 -d code=CODE
    ```
 
    If the response includes `refresh_token_expires_in`, the app is still in Testing and the token will expire again.
